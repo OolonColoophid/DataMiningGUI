@@ -3,71 +3,77 @@ from tkinter import *
 
 from ImportDataManager import ImportDataManager
 
-root = Tk()
-root.title("Focking")
 
-# create import data manager
-importDataManager = ImportDataManager()
+class Mainframe(Frame):
 
-# create menu bar
-menu = Menu(root)
-root.config(menu=menu)
-fileMenu = Menu(menu, tearoff=False)
-menu.add_cascade(label="File", menu=fileMenu)
-fileMenu.add_command(label="Import data...", command=importDataManager.setFileName)
+    def __init__(self, root):
+        self.root = root
+        self.importDataManager = ImportDataManager(self)
 
-# create labels
-lblReduceFeatures = Label(root, text="Reduce Features?")
-lblInterpolateMissingValues = Label(root, text="Interpolate missing values?")
-lblAlgorithm = Label(root, text="Algorithm: ")
+        # create menu bar
+        self.menubar = Menu(root)
+        root.config(menu=self.menubar)
+        self.fileMenu = Menu(self.menubar, tearoff=False)
+        self.menubar.add_cascade(label="File", menu=self.fileMenu)
+        self.fileMenu.add_command(label="Import data...", command=self.importDataManager.set_filename)
 
-# create comboboxes
-cmbReduceFeatures = Combobox(root, state="readonly", values=["Yes", "No"], width=5)
-cmbInterpolateMissingValues = Combobox(root, state="readonly", values=["Yes", "No"], width=5)
-cmbAlgorithm = Combobox(root, state="readonly", values=["Logistic Regression",
-                                                        "Decision Tree",
-                                                        "Support Vector Machine",
-                                                        "Naive Bayes",
-                                                        "Random Forest"])
+        # create labels
+        self.lblReduceFeatures = Label(root, text="Reduce Features?")
+        self.lblInterpolateMissingValues = Label(root, text="Interpolate missing values?")
+        self.lblAttributes = Label(root, text="Select class label: ")
+        self.lblAlgorithm = Label(root, text="Select algorithm: ")
 
-# set default combobox value
-cmbReduceFeatures.set("No")
-cmbInterpolateMissingValues.set("No")
-cmbAlgorithm.set("Logistic Regression")
+        # create comboboxes
+        self.cmbReduceFeatures = Combobox(root, state="readonly", values=["Yes", "No"], width=5)
+        self.cmbInterpolateMissingValues = Combobox(root, state="readonly", values=["Yes", "No"], width=5)
+        self.cmbAttributes = Combobox(root, state="readonly")
+        self.cmbAlgorithm = Combobox(root, state="readonly", values=["Logistic Regression",
+                                                                     "Decision Tree",
+                                                                     "Support Vector Machine",
+                                                                     "Naive Bayes",
+                                                                     "Random Forest"])
 
+        # set default combobox values
+        self.cmbReduceFeatures.set("No")
+        self.cmbInterpolateMissingValues.set("No")
+        self.cmbAlgorithm.set("Logistic Regression")
 
-def getReduceFeatureOption():
-    return cmbReduceFeatures.get()
+        # create buttons
+        self.runButton = Button(text="Run", width=10)
+        self.runButton.bind("<Button-1>", self.getSelectedUserParams)
 
+        # set grid layout
+        rowNumber = 0
+        self.lblReduceFeatures.grid(row=rowNumber, column=1)
+        self.cmbReduceFeatures.grid(row=rowNumber, column=2)
+        rowNumber += 1
+        self.lblInterpolateMissingValues.grid(row=rowNumber, column=1)
+        self.cmbInterpolateMissingValues.grid(row=rowNumber, column=2)
+        rowNumber += 1
+        self.lblAttributes.grid(row=rowNumber, column=1)
+        self.cmbAttributes.grid(row=rowNumber, column=2)
+        rowNumber += 1
+        self.lblAlgorithm.grid(row=rowNumber, column=1)
+        self.cmbAlgorithm.grid(row=rowNumber, column=2)
+        rowNumber += 1
+        self.runButton.grid(row=rowNumber, column=1)
+        rowNumber += 1
 
-def getInterpolateMissingValuesOption():
-    return cmbInterpolateMissingValues.get()
+    def getReduceFeatureOption(self):
+        return self.cmbReduceFeatures.get()
 
+    def getInterpolateMissingValuesOption(self):
+        return self.cmbInterpolateMissingValues.get()
 
-def getSelectedAlgorithm():
-    return cmbAlgorithm.get()
+    def getSelectedClassLabel(self):
+        return self.cmbAttributes.get()
 
+    def getSelectedAlgorithm(self):
+        return self.cmbAlgorithm.get()
 
-def getSelectedUserParams(event):
-    print("Reduce features: " + getReduceFeatureOption())
-    print("Interpolate missing values: " + getInterpolateMissingValuesOption())
-
-
-# create buttons
-runButton = Button(text="Run")
-runButton.bind("<Button-1>", getSelectedUserParams)
-
-# set grid layout
-
-lblReduceFeatures.grid(row=1, column=1)
-cmbReduceFeatures.grid(row=1, column=2)
-
-lblInterpolateMissingValues.grid(row=2, column=1)
-cmbInterpolateMissingValues.grid(row=2, column=2)
-
-lblAlgorithm.grid(row=3, column=1)
-cmbAlgorithm.grid(row=3, column=2)
-
-runButton.grid(row=4, column=1)
-
-root.mainloop()
+    def getSelectedUserParams(self, event):
+        print("Reduce features: " + self.getReduceFeatureOption())
+        print("Interpolate missing values: " + self.getInterpolateMissingValuesOption())
+        print("Class label: " + self.getSelectedClassLabel())
+        print("Selected algorithm: " + self.getSelectedAlgorithm())
+        print(self.importDataManager.summary())
