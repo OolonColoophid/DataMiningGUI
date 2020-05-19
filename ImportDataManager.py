@@ -17,7 +17,8 @@ class ImportDataManager:
     column_names: the columns of the data that is imported
     """
 
-    def __init__(self, filename=None, column_names=None, data=None):
+    def __init__(self, mainframe, filename=None, column_names=None, data=None):
+        self.mainframe = mainframe
         self.filename = filename
         self.column_names = column_names
         self.data = data
@@ -43,8 +44,8 @@ class ImportDataManager:
         return self.column_names
 
     def summary(self):
-        print(self.get_filename())
-        print(self.get_column_names())
+        print("Filepath: " + str(self.get_filename()))
+        print("Column names: " + str(self.get_column_names()))
         print(self.get_data_head())
 
     def set_filename(self):
@@ -55,6 +56,9 @@ class ImportDataManager:
             self.filename = None
         self.set_data()
         self.set_column_names()
+        self.mainframe.cmbAttributes['values'] = self.get_column_names()
+        if self.get_column_names() is not None and len(self.get_column_names()) > 0:
+            self.mainframe.cmbAttributes.set(self.column_names[0])
 
     def set_data(self):
         if self.get_filename() != '':
