@@ -1,8 +1,5 @@
 from tkinter.filedialog import askopenfilename
 
-# need xlrd library to handle .xls and .xlsx data import
-import xlrd
-
 # convert data in all filetypes into pandas DataFrame
 import pandas as pd
 
@@ -32,14 +29,12 @@ class ImportDataManager:
         if isinstance(self.data, pd.DataFrame):
             return self.data
 
-    # used to show the first five rows of data to the user
-    # when the data has been imported, update table to contain first five rows of data
+    # returns the column names and first five rows of the pandas dataframe
     def get_data_head(self):
         if isinstance(self.data, pd.DataFrame):
             return self.data.head()
 
     # returns the column names of the imported data
-    # user selects the class label for the algorithms
     def get_column_names(self):
         return self.column_names
 
@@ -59,6 +54,7 @@ class ImportDataManager:
         self.mainframe.cmbAttributes['values'] = self.get_column_names()
         if self.get_column_names() is not None and len(self.get_column_names()) > 0:
             self.mainframe.cmbAttributes.set(self.column_names[0])
+        self.mainframe.previewDataTable.update_table()
 
     def set_data(self):
         if self.get_filename() != '':

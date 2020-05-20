@@ -1,10 +1,15 @@
-from tkinter.ttk import Combobox
+from tkinter.ttk import Combobox, Treeview
 from tkinter import *
 
 from ImportDataManager import ImportDataManager
+from PreviewDataTable import PreviewDataTable
 
 
 class Mainframe(Frame):
+    """
+    Multiple Docuement Interface
+    Everything in the application stems from the mainframe
+    """
 
     def __init__(self, root):
         self.root = root
@@ -38,24 +43,33 @@ class Mainframe(Frame):
         self.cmbInterpolateMissingValues.set("No")
         self.cmbAlgorithm.set("Logistic Regression")
 
+        # create preview data table
+        self.previewDataTable = PreviewDataTable(self)
+
         # create buttons
         self.runButton = Button(text="Run", width=10)
         self.runButton.bind("<Button-1>", self.getSelectedUserParams)
 
         # set grid layout
         rowNumber = 0
-        self.lblReduceFeatures.grid(row=rowNumber, column=1)
-        self.cmbReduceFeatures.grid(row=rowNumber, column=2)
+        self.lblReduceFeatures.grid(row=rowNumber, column=1, sticky=W)
+        self.cmbReduceFeatures.grid(row=rowNumber, column=2, sticky=W)
         rowNumber += 1
-        self.lblInterpolateMissingValues.grid(row=rowNumber, column=1)
-        self.cmbInterpolateMissingValues.grid(row=rowNumber, column=2)
+        self.lblInterpolateMissingValues.grid(row=rowNumber, column=1, sticky=W)
+        self.cmbInterpolateMissingValues.grid(row=rowNumber, column=2, sticky=W)
         rowNumber += 1
-        self.lblAttributes.grid(row=rowNumber, column=1)
-        self.cmbAttributes.grid(row=rowNumber, column=2)
+        self.lblAttributes.grid(row=rowNumber, column=1, sticky=W)
+        self.cmbAttributes.grid(row=rowNumber, column=2, sticky=W)
         rowNumber += 1
-        self.lblAlgorithm.grid(row=rowNumber, column=1)
-        self.cmbAlgorithm.grid(row=rowNumber, column=2)
+        self.lblAlgorithm.grid(row=rowNumber, column=1, sticky=W)
+        self.cmbAlgorithm.grid(row=rowNumber, column=2, sticky=W)
         rowNumber += 1
+
+        self.previewDataTable.treeview.grid(row=rowNumber, column=1,
+                                            rowspan=self.previewDataTable.treeview.winfo_width(),
+                                            columnspan=2, sticky=W)
+        rowNumber += 1
+
         self.runButton.grid(row=rowNumber, column=1)
         rowNumber += 1
 
