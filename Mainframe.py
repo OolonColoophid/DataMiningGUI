@@ -1,7 +1,9 @@
 from tkinter.ttk import Combobox, Treeview
 from tkinter import *
 
-from ImportDataManager import ImportDataManager
+from ImportExportDataManager import ImportExportDataManager
+from DataPreprocessingManager import DataPreprocessingManager
+from OptionsWindow import OptionsWindow
 from PreviewDataTable import PreviewDataTable
 
 
@@ -13,14 +15,20 @@ class Mainframe(Frame):
 
     def __init__(self, root):
         self.root = root
-        self.importDataManager = ImportDataManager(self)
 
+        self.importExportDataManager = ImportExportDataManager(self)
+        self.dataPreprocessingManager = DataPreprocessingManager(self)
+        self.optionsWindow = OptionsWindow(self)
         # create menu bar
         self.menubar = Menu(root)
         root.config(menu=self.menubar)
         self.fileMenu = Menu(self.menubar, tearoff=False)
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
-        self.fileMenu.add_command(label="Import data...", command=self.importDataManager.set_filename)
+        self.fileMenu.add_command(label="Import data...", command=self.importExportDataManager.set_filename)
+        self.fileMenu.add_command(label="Options...", command=self.optionsWindow.create)
+        self.dataMenu = Menu(self.menubar, tearoff=False)
+        self.menubar.add_cascade(label="Data", menu=self.dataMenu)
+        self.dataMenu.add_command(label="Replace missing values...", command=self.dataPreprocessingManager.create)
 
         # create labels
         self.lblReduceFeatures = Label(root, text="Reduce Features?")
@@ -90,4 +98,4 @@ class Mainframe(Frame):
         print("Interpolate missing values: " + self.getInterpolateMissingValuesOption())
         print("Class label: " + self.getSelectedClassLabel())
         print("Selected algorithm: " + self.getSelectedAlgorithm())
-        print(self.importDataManager.summary())
+        print(self.importExportDataManager.summary())
