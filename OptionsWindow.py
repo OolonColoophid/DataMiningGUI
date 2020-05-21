@@ -26,10 +26,18 @@ class OptionsWindow:
         self.cmbDecimalPlaces.set(self.settings.get("decimal places"))
         self.applyButton = Button(self.window, text="Apply changes", command=self.apply_changes)
         # widget layout
+        separator1 = Label(self.window, text="")
+        separator1.grid(row=rowNumber, column=1)
+        rowNumber += 1
         self.lblDecimalPlaces.grid(row=rowNumber, column=1)
         self.cmbDecimalPlaces.grid(row=rowNumber, column=2)
-        self.applyButton.grid(column=2, sticky="s")
+        rowNumber += 1
+        separator2 = Label(self.window, text="")
+        separator2.grid(row=rowNumber, column=1)
+        rowNumber += 1
+        self.applyButton.grid(row=rowNumber, column=2, sticky="s")
 
     def apply_changes(self):
         self.settings["decimal places"] = self.cmbDecimalPlaces.get()
         self.mainframe.importExportDataManager.update_data()
+        self.window.withdraw()
