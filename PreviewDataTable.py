@@ -32,18 +32,19 @@ class PreviewDataTable:
             self.treeview.delete(child)
 
         # insert new column names
-        self.treeview['columns'] = self.mainframe.importDataManager.get_column_names()
-
-        # insert data from head of pandas dataframe
-        for i, j in self.mainframe.importDataManager.get_data_head().iterrows():
-            append_data = []
-            for k in j:
-                append_data.append(k)
-            self.treeview.insert('', 'end', value=append_data)
+        self.treeview['columns'] = self.mainframe.importExportDataManager.get_column_names()
 
         for column in self.treeview['columns']:
             self.treeview.heading(column, text=str(column), anchor="w")
             self.treeview.column(column, anchor="center", width=80, stretch=False)
+
+        # insert data from head of pandas dataframe
+        if self.mainframe.importExportDataManager.get_data() is not None:
+            for i, j in self.mainframe.importExportDataManager.get_data_head().iterrows():
+                append_data = []
+                for k in j:
+                    append_data.append(k)
+                self.treeview.insert('', 'end', value=append_data)
 
     # makes columns unresizeable
     def handle_click(self, event):

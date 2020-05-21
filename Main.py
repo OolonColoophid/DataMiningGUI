@@ -7,6 +7,7 @@ def main():
     root.title("Focking")
     root.geometry("600x400")
     Mainframe(root)
+    root.protocol("WM_DELETE_WINDOW", sys.exit)
     root.mainloop()
 
 
