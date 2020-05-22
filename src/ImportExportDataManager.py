@@ -1,9 +1,5 @@
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
-
-# convert data in all filetypes into pandas DataFrame
-from tkinter.messagebox import Message
-
 import pandas as pd
 
 
@@ -63,8 +59,9 @@ class ImportExportDataManager:
             self.column_names = list(self.get_data().columns)
 
     def load_data(self):
-        # if user has selected a .csv file, use pd.read_csv
+        df = None
         try:
+            # if user has selected a .csv file, use pd.read_csv
             if self.get_filename()[-3:] == "csv":
                 df = pd.read_csv(self.get_filename())
                 self.format_data(df)
@@ -111,4 +108,7 @@ class ImportExportDataManager:
     def save_data_as_csv_file(self, dataframe):
         if dataframe is not None:
             filename = filedialog.asksaveasfilename()
-            dataframe.to_csv(filename+".csv", index=False)
+            if str(filename)[-4:] == ".csv":
+                dataframe.to_csv(filename, index=False)
+            else:
+                dataframe.to_csv(filename + ".csv", index=False)

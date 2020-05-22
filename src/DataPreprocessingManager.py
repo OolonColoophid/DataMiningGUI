@@ -1,4 +1,6 @@
 from tkinter import *
+from tkinter.ttk import Combobox
+
 import numpy as np
 import pandas as pd
 from sklearn.experimental import enable_iterative_imputer
@@ -6,10 +8,23 @@ from sklearn.impute import IterativeImputer
 
 
 class DataPreprocessingManager:
+    """
+    DataPreprocessingManager
+    Allows user to preprocess the data:
+        o Replace missing values using multivariate feature imputation
+        o Replace missing values with mean/median
+        o Remove instances from dataset with too many missing attributes
+
+    Gives user choice to decide how many attributes must be missing before an instance is deleted
+    e.g. Dataset with 10 attributes, user selects 40% theshold
+        IF instance missing 4 attributes, instance is removed from dataset (NOT permanently)
+    """
+
     def __init__(self, mainframe, dataframe=None, feature_list=None):
         self.mainframe = mainframe
         self.window = None
         self.frame = None
+        self.cmbSelectMethod = None
         self.dataframe = dataframe
         self.altered_dataframe = None
         self.feature_list = feature_list
@@ -23,10 +38,14 @@ class DataPreprocessingManager:
             self.frame = Frame(self.window)
             self.set_dataframe(self.mainframe.importExportDataManager.get_data())
             self.set_feature_list(self.mainframe.importExportDataManager.get_column_names())
-            self.set_checkbox_list()
+            self.cmbSelectMethod = Combobox(self.window, state="readonly", width=30,
+                                            values=["Multivariate feature imputation",
+                                                    "Replace with mean",
+                                                    "Replace  with median"])
+            self.cmbSelectMethod.set("Multivariate feature imputation")
+            self.set_layout()
             self.window.deiconify()
-            win_height = len(self.feature_list) * 30
-            self.window.geometry("300x" + str(win_height))
+            self.window.geometry("300x" + str((len(self.get_feature_list()) * 30) + 150))
         else:
             print("No dataset loaded")
 
@@ -51,27 +70,50 @@ class DataPreprocessingManager:
     def set_feature_list(self, feature_list):
         self.feature_list = feature_list
 
-    def set_checkbox_list(self):
+    def set_layout(self):
         if self.feature_list is not None:
             rowNumber = 0
+            separator = Label(self.window, text="").grid(row=rowNumber, column=0)
+            rowNumber += 1
             lblUserPrompt = Label(self.window, text="Select attributes with missing values: ")
-            lblUserPrompt.grid(row=rowNumber, column=1)
+            lblUserPrompt.grid(row=rowNumber, column=0)
             rowNumber += 1
             for x in self.feature_list:
                 v = IntVar(self.window)
                 checkbox = Checkbutton(self.window, text=str(x) + "\t" + str(self.get_dataframe()[x].dtype), variable=v)
                 checkbox.var = v
                 self.checkbox_list.append(checkbox)
-                checkbox.grid(row=rowNumber, column=1, sticky="w")
+                checkbox.grid(row=rowNumber, column=0, sticky="w")
                 rowNumber += 1
+
+            separator = Label(self.window, text="").grid(row=rowNumber, column=0)
+            rowNumber += 1
+            lblSelectMethod = Label(self.window, text="Select method: ")
+            lblSelectMethod.grid(row=rowNumber, column=0, sticky=W)
+            rowNumber += 1
+            self.cmbSelectMethod.grid(row=rowNumber, column=0, sticky=W)
+            rowNumber += 1
+            separator = Label(self.window, text="").grid(row=rowNumber, column=0)
+            rowNumber += 1
             runButton = Button(self.window, text="Replace", command=self.run_button_action)
-            runButton.grid(row=rowNumber, column=2)
+            runButton.grid(row=rowNumber, column=0)
+            rowNumber += 1
+            separator = Label(self.window, text="").grid(row=rowNumber, column=0)
 
     def run_button_action(self):
         selected_attributes = self.get_selected_attributes()
+        selected_method = self.cmbSelectMethod.get()
+        if selected_method == "Multivariate feature imputation":
+            self.run_multivariate_feature_imputation(selected_attributes)
+        else:
+            pass
+
+    def run_multivariate_feature_imputation(self, selected_attributes):
         self.remove_nan_values(selected_attributes)
         self.impute_data(selected_attributes)
+        self.altered_dataframe = self.format_data(self.altered_dataframe)
         self.mainframe.importExportDataManager.save_data_as_csv_file(self.altered_dataframe)
+        self.mainframe.previewDataTable.update_table()
         print("Success")
 
     def set_dataframe(self, dataframe):
@@ -100,3 +142,9 @@ class DataPreprocessingManager:
         y = self.altered_dataframe[selected_attributes]
         imp.fit(X, y)
         self.altered_dataframe = pd.DataFrame(data=imp.transform(self.dataframe), columns=self.feature_list)
+
+    def format_data(self, df):
+        for column in df.columns:
+            if df[column].dtype == "float64":
+                df = df.round({column: int(self.mainframe.optionsWindow.settings.get("decimal places"))})
+        return df

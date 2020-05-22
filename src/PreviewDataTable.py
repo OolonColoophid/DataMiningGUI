@@ -3,7 +3,6 @@ from tkinter import *
 
 
 class PreviewDataTable:
-
     """
     PreviewDataTable
     show the user the head of the data that they have imported
@@ -24,7 +23,7 @@ class PreviewDataTable:
             self.treeview.column(column, anchor="center", width=80, stretch=False)
         for i in range(5):
             self.treeview.insert('', 'end')
-        self.treeview.bind('<Button-1>', self.handle_click)
+            self.treeview.bind('<Button-1>', self.handle_click)
 
     def update_table(self):
         # delete everything from treeview
