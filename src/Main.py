@@ -1,5 +1,5 @@
 from tkinter import *
-from Mainframe import Mainframe
+from src.Mainframe import Mainframe
 
 
 def main():

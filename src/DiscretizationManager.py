@@ -1,3 +1,5 @@
+from tkinter.ttk import Combobox
+
 import sklearn
 from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
@@ -6,7 +8,12 @@ import numpy as np
 
 
 class DiscretizationManager:
-
+    """
+    DiscretizationManager
+    Allows user to turn continuous attributes into categorical attributes
+    E.g. real values 30-50, plot data, allow user to select ranges for categories
+    Use decision tree to discretize invididual attributes
+    """
     def __init__(self, mainframe, dataframe=None, feature_list=None):
         self.mainframe = mainframe
         self.window = None
@@ -79,7 +86,9 @@ class DiscretizationManager:
 
     def get_selected_attributes(self):
         selected_attributes = []
-        for i in range(len(self.checkbox_list)):
+        print(self.checkbox_list)
+        print(self.feature_list)
+        for i in range(0, len(self.checkbox_list)-1):
             if self.checkbox_list[i].var.get() == 1:
                 selected_attributes.append(self.feature_list[i])
         return selected_attributes
