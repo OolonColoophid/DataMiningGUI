@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 
-from Model import Model
+from src.Model import Model
 from src.DiscretizationManager import DiscretizationManager
 from src.ImportExportDataManager import ImportExportDataManager
 from src.DataPreprocessingManager import DataPreprocessingManager
