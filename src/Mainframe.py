@@ -1,6 +1,12 @@
 from tkinter.ttk import Combobox
 from tkinter import *
 
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
+
+from Model import Model
 from src.DiscretizationManager import DiscretizationManager
 from src.ImportExportDataManager import ImportExportDataManager
 from src.DataPreprocessingManager import DataPreprocessingManager
@@ -22,6 +28,7 @@ class Mainframe(Frame):
         self.discretizationManager = DiscretizationManager(self)
         self.optionsWindow = OptionsWindow(self)
         self.frame = Frame(root)
+        self.model = None
 
         # create menu bar
         self.menubar = Menu(root)
@@ -46,10 +53,10 @@ class Mainframe(Frame):
         self.cmbInterpolateMissingValues = Combobox(self.frame, state="readonly", values=["Yes", "No"], width=5)
         self.cmbAttributes = Combobox(self.frame, state="readonly")
         self.cmbAlgorithm = Combobox(self.frame, state="readonly", values=["Logistic Regression",
-                                                                     "Decision Tree",
-                                                                     "Support Vector Machine",
-                                                                     "Naive Bayes",
-                                                                     "Random Forest"])
+                                                                           "Decision Tree",
+                                                                           "Support Vector Machine",
+                                                                           "Naive Bayes",
+                                                                           "Random Forest"])
 
         # set default combobox values
         self.cmbReduceFeatures.set("No")
@@ -61,7 +68,7 @@ class Mainframe(Frame):
 
         # create buttons
         self.runButton = Button(text="Run", width=10)
-        self.runButton.bind("<Button-1>", self.getSelectedUserParams)
+        self.runButton.bind("<Button-1>", self.run_algorithm)
 
         # set grid layout
         rowNumber = 0
@@ -112,3 +119,26 @@ class Mainframe(Frame):
         print("Class label: " + self.getSelectedClassLabel())
         print("Selected algorithm: " + self.getSelectedAlgorithm())
         print(self.importExportDataManager.summary())
+
+    def run_algorithm(self, event):
+        if self.importExportDataManager.filename is not None and \
+                isinstance(self.importExportDataManager.data, pd.DataFrame):
+            if self.getReduceFeatureOption() == 'Yes':
+                print("Reducing features...")
+            if self.getInterpolateMissingValuesOption() == 'Yes':
+                print("Interpolating values...")
+            print("Training model...")
+            self.create_model()
+
+    def create_model(self):
+        if self.model is None:
+            self.model = Model(self, None)
+        if self.model.model is None:
+            if self.getSelectedAlgorithm() == "Logistic Regression":
+                self.model.set_model(LogisticRegression(solver='lbfgs', max_iter=1000))
+            elif self.getSelectedAlgorithm() == "Decision Tree":
+                self.model.set_model(DecisionTreeClassifier())
+            elif self.getSelectedAlgorithm() == "Naive Bayes":
+                self.model.set_model(GaussianNB())
+        print("Created model")
+        self.model.performance_summary()
