@@ -1,5 +1,3 @@
-from tkinter.ttk import Combobox
-
 import sklearn
 from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
@@ -35,13 +33,10 @@ class DiscretizationManager:
             self.window = Tk()
             self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)
             self.window.title("Discretize attributes")
-            self.frame = Frame(self.window)
             self.set_dataframe(self.mainframe.importExportDataManager.get_data())
             self.set_feature_list(self.mainframe.importExportDataManager.get_column_names())
             self.set_layout()
-            self.window.deiconify()
-            win_height = len(self.feature_list) * 30
-            self.window.geometry("300x" + str(len(self.get_feature_list())*35))
+            self.window.geometry("300x" + str(len(self.get_feature_list())*30+100))
 
     def get_feature_list(self):
         return self.feature_list
@@ -61,8 +56,7 @@ class DiscretizationManager:
     def set_layout(self):
         if self.feature_list is not None:
             rowNumber = 0
-            lblUserPrompt = Label(self.window, text="Select attributes to discretize: ")
-            lblUserPrompt.grid(row=rowNumber, column=1)
+            Label(self.window, text="Select attributes to discretize: ").grid(row=rowNumber, column=1)
             rowNumber += 1
             for x in self.feature_list:
                 v = IntVar(self.window)
@@ -78,15 +72,13 @@ class DiscretizationManager:
             runButton = Button(self.window, text="Apply", command=self.discretize_data)
             runButton.grid(row=rowNumber, column=2)
             rowNumber += 1
-            separator = Label(self.window, text="")
-            separator.grid(row=rowNumber, column=1)
+            Label(self.window, text="").grid(row=rowNumber, column=1)
 
     def set_dataframe(self, dataframe):
         self.dataframe = dataframe
 
     def get_selected_attributes(self):
         selected_attributes = []
-        print(self.checkbox_list)
         print(self.feature_list)
         for i in range(0, len(self.checkbox_list)-1):
             if self.checkbox_list[i].var.get() == 1:
@@ -108,6 +100,7 @@ class DiscretizationManager:
             self.decisionTree.fit(X, y)
             plt.figure()
             sklearn.tree.plot_tree(self.decisionTree,
+                                   feature_names=[str(attribute)],
                                    class_names=["positive", "negative"])
             plt.title(attribute)
         plt.show()
