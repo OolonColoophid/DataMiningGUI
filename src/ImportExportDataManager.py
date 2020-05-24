@@ -42,17 +42,21 @@ class ImportExportDataManager:
         print("Column names: " + str(self.get_column_names()))
         print(self.get_data_head())
 
-    def set_filename(self):
-        filename = askopenfilename()
-        if filename != '':
-            self.filename = filename
-        else:
-            self.filename = None
-        self.update_data()
+    def set_filename(self, filename=None):
+        if filename is None:
+            filename = askopenfilename()
+            if filename != '':
+                self.filename = filename
+            self.update_data()
 
-    def set_data(self):
-        if self.valid_file():
-            self.data = self.load_data()
+    def set_data(self, dataframe=None):
+        if dataframe is None:
+            if self.valid_file():
+                self.data = self.load_data()
+        else:
+            if isinstance(dataframe, pd.DataFrame):
+                self.data = dataframe
+        self.map_data(self.get_data())
 
     def set_column_names(self):
         if isinstance(self.get_data(), pd.DataFrame):
@@ -64,33 +68,27 @@ class ImportExportDataManager:
             # if user has selected a .csv file, use pd.read_csv
             if self.get_filename()[-3:] == "csv":
                 df = pd.read_csv(self.get_filename())
-                self.format_data(df)
-                self.map_data(df)
             # if user has selected a Microsoft Excel file, use pd.read_excel
             elif self.get_filename()[-3:] == "xls" or self.get_filename()[-4:] == "xlsx":
                 df = pd.read_excel(str(self.get_filename()))
-                self.format_data(df)
-                self.map_data(df)
-            else:
-                pass
             return df
         except TypeError:
             print("Data import cancelled")
 
-    def format_data(self, df):
-        for column in df.columns:
-            if df[column].dtype == "float64":
-                df.loc[:, column] = df.round({column: int(self.mainframe.optionsWindow.settings.get("decimal places"))})
-
     def map_data(self, df):
-        for column in df.columns:
-            if df[column].dtype == "object":
-                unique_values = df[column].unique()
-                mapping = {label: idx for idx, label in enumerate(unique_values)}
-                df[column] = df[column].map(mapping)
+        if isinstance(self.get_data(), pd.DataFrame):
+            for column in df.columns:
+                if df[column].dtype == "object":
+                    unique_values = df[column].unique()
+                    mapping = {label: idx for idx, label in enumerate(unique_values)}
+                    df[column] = df[column].map(mapping)
 
-    def update_data(self):
-        self.set_data()
+    def update_data(self, dataframe=None):
+        if dataframe is None:
+            self.set_data()
+        else:
+            if isinstance(dataframe, pd.DataFrame):
+                self.set_data(dataframe)
         self.set_column_names()
         self.mainframe.cmbAttributes['values'] = self.get_column_names()
         if self.get_column_names() is not None and len(self.get_column_names()) > 0:

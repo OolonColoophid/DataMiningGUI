@@ -121,8 +121,8 @@ class Mainframe(Frame):
         print(self.importExportDataManager.summary())
 
     def run_algorithm(self, event):
-        if self.importExportDataManager.filename is not None and \
-                isinstance(self.importExportDataManager.data, pd.DataFrame):
+        if self.importExportDataManager.get_filename() is not None and \
+                isinstance(self.importExportDataManager.get_data(), pd.DataFrame):
             if self.getReduceFeatureOption() == 'Yes':
                 print("Reducing features...")
             if self.getInterpolateMissingValuesOption() == 'Yes':

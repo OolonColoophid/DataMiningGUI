@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 
 import numpy as np
 import pandas as pd
@@ -75,7 +76,11 @@ class DataPreprocessingManager:
         self.remove_nan_values(selected_attributes)
         self.impute_data(selected_attributes)
         self.altered_dataframe = self.format_data(self.altered_dataframe)
-        self.mainframe.importExportDataManager.save_data_as_csv_file(self.altered_dataframe)
+        messageBox = messagebox.askquestion("Save preprocessed data", "Would you like to save the preprocessed data?")
+        if messageBox == 'yes':
+            self.mainframe.importExportDataManager.save_data_as_csv_file(self.altered_dataframe)
+        self.mainframe.importExportDataManager.update_data(self.altered_dataframe)
+        self.window.withdraw()
 
     def set_dataframe(self, dataframe):
         self.dataframe = dataframe
