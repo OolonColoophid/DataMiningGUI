@@ -56,7 +56,7 @@ class ImportExportDataManager:
         else:
             if isinstance(dataframe, pd.DataFrame):
                 self.data = dataframe
-        self.map_data(self.get_data())
+        # self.map_data(self.get_data())
 
     def set_column_names(self):
         if isinstance(self.get_data(), pd.DataFrame):

@@ -1,5 +1,5 @@
 import sklearn
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, _tree
 import matplotlib.pyplot as plt
 from tkinter import *
 import numpy as np
@@ -62,6 +62,7 @@ class DiscretizationManager:
                 v = IntVar(self.window)
                 if str(x) == str(self.mainframe.getSelectedClassLabel()):
                     checkbox = Checkbutton(self.window, text=str(x) + "\t" + " ** Selected class label ** ", variable=v, state=DISABLED)
+                    self.count_class_number(self.dataframe, self.mainframe.getSelectedClassLabel())
                 else:
                     checkbox = Checkbutton(self.window, text=str(x), variable=v)
                 checkbox.var = v
@@ -77,10 +78,15 @@ class DiscretizationManager:
     def set_dataframe(self, dataframe):
         self.dataframe = dataframe
 
+    def count_class_number(self, dataframe, class_label):
+        values = dataframe[class_label].value_counts().keys().tolist()
+        counts = dataframe[class_label].value_counts().tolist()
+        value_dict = dict(zip(values, counts))
+        return value_dict
+
     def get_selected_attributes(self):
         selected_attributes = []
-        print(self.feature_list)
-        for i in range(0, len(self.checkbox_list)-1):
+        for i in range(len(self.checkbox_list)-1):
             if self.checkbox_list[i].var.get() == 1:
                 selected_attributes.append(self.feature_list[i])
         return selected_attributes
@@ -98,9 +104,29 @@ class DiscretizationManager:
                                                        min_samples_split=min_split,
                                                        min_samples_leaf=min_samples)
             self.decisionTree.fit(X, y)
+            self.tree_to_code(self.decisionTree, attribute)
             plt.figure()
             sklearn.tree.plot_tree(self.decisionTree,
                                    feature_names=[str(attribute)],
-                                   class_names=["positive", "negative"])
+                                   class_names=list(self.count_class_number(self.get_dataframe(), class_label).keys()))
             plt.title(attribute)
+            self.window.withdraw()
         plt.show()
+
+    def tree_to_code(self, tree, attribute):
+        tree_ = self.decisionTree.tree_
+        feature_names = [attribute]
+
+        def recurse(node, depth):
+            indent = "  " * depth
+            if tree_.feature[node] != _tree.TREE_UNDEFINED:
+                name = feature_names[0]
+                threshold = tree_.threshold[node]
+                print("%s if %s <= %s:" % (indent, name, threshold))
+                recurse(tree_.children_left[node], depth + 1)
+                print("%s else if %s > %s" % (indent, name, threshold))
+                recurse(tree_.children_right[node], depth + 1)
+            else:
+                print("%s return %s" % (indent, tree_.value[node]))
+
+        recurse(0, 1)
