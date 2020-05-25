@@ -1,8 +1,12 @@
+from tkinter import messagebox
+
+import pandas as pd
 import sklearn
 from sklearn.tree import DecisionTreeClassifier, _tree
 import matplotlib.pyplot as plt
 from tkinter import *
 import numpy as np
+from collections import Counter
 
 
 class DiscretizationManager:
@@ -15,7 +19,6 @@ class DiscretizationManager:
     def __init__(self, mainframe, dataframe=None, feature_list=None):
         self.mainframe = mainframe
         self.window = None
-        self.frame = None
         self.decisionTree = None
         self.dataframe = dataframe
         self.altered_dataframe = None
@@ -24,17 +27,20 @@ class DiscretizationManager:
 
     def create(self):
         if self.mainframe.importExportDataManager.get_data() is None:
-            print("No data loaded")
+            messagebox.showinfo("Information", "No data selected")
             pass
         elif self.mainframe.getSelectedClassLabel() == "":
-            print("Class label not selected")
+            messagebox.showinfo("Information", "Class label not selected")
             pass
         else:
             self.window = Tk()
             self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)
             self.window.title("Discretize attributes")
-            self.set_dataframe(self.mainframe.importExportDataManager.get_data())
-            self.set_feature_list(self.mainframe.importExportDataManager.get_column_names())
+            if isinstance(self.mainframe.dataPreprocessingManager.altered_dataframe, pd.DataFrame):
+                self.set_dataframe(self.mainframe.dataPreprocessingManager.get_altered_dataframe())
+            else:
+                self.set_dataframe(self.mainframe.importExportDataManager.get_data())
+            self.set_feature_list(list(self.dataframe.columns))
             self.set_layout()
             self.window.geometry("300x" + str(len(self.get_feature_list())*30+100))
 
@@ -105,13 +111,14 @@ class DiscretizationManager:
                                                        min_samples_leaf=min_samples)
             self.decisionTree.fit(X, y)
             self.tree_to_code(self.decisionTree, attribute)
+            dict_labels = self.count_class_number(self.get_dataframe(), class_label)
             plt.figure()
             sklearn.tree.plot_tree(self.decisionTree,
                                    feature_names=[str(attribute)],
-                                   class_names=list(self.count_class_number(self.get_dataframe(), class_label).keys()))
+                                   class_names=list(self.mainframe.importExportDataManager.class_labels.keys()))
             plt.title(attribute)
             self.window.withdraw()
-        plt.show()
+        # plt.show()
 
     def tree_to_code(self, tree, attribute):
         tree_ = self.decisionTree.tree_
@@ -122,11 +129,12 @@ class DiscretizationManager:
             if tree_.feature[node] != _tree.TREE_UNDEFINED:
                 name = feature_names[0]
                 threshold = tree_.threshold[node]
-                print("%s if %s <= %s:" % (indent, name, threshold))
+                print("%s if %s <= %.1f:" % (indent, name, threshold))
                 recurse(tree_.children_left[node], depth + 1)
-                print("%s else if %s > %s" % (indent, name, threshold))
+                print("%s else if %s > %.1f" % (indent, name, threshold))
                 recurse(tree_.children_right[node], depth + 1)
             else:
-                print("%s return %s" % (indent, tree_.value[node]))
-
+                label = str(tree.classes_[np.argmax(tree_.value[node])])
+                p = tree_.value[node].max() / tree_.n_node_samples[node]
+                print("%s %s (p=%.2f)" % (indent, label, p.round(decimals=2)))
         recurse(0, 1)

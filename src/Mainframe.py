@@ -1,3 +1,4 @@
+from tkinter import messagebox
 from tkinter.ttk import Combobox
 from tkinter import *
 
@@ -54,14 +55,12 @@ class Mainframe(Frame):
         self.cmbAttributes = Combobox(self.frame, state="readonly")
         self.cmbAlgorithm = Combobox(self.frame, state="readonly", values=["Logistic Regression",
                                                                            "Decision Tree",
-                                                                           "Support Vector Machine",
-                                                                           "Naive Bayes",
-                                                                           "Random Forest"])
+                                                                           "Naive Bayes"])
 
         # set default combobox values
         self.cmbReduceFeatures.set("No")
         self.cmbInterpolateMissingValues.set("No")
-        self.cmbAlgorithm.set("Logistic Regression")
+        self.cmbAlgorithm.set("None")
 
         # create preview data table
         self.previewDataTable = PreviewDataTable(self)
@@ -85,17 +84,14 @@ class Mainframe(Frame):
         self.lblAlgorithm.grid(row=rowNumber, column=1, sticky=W)
         self.cmbAlgorithm.grid(row=rowNumber, column=2, sticky=W)
         rowNumber += 1
-
-        separator1 = Label(root, text="")
-        separator1.grid(row=rowNumber, column=1)
+        Label(root, text="").grid(row=rowNumber, column=1)
         rowNumber += 1
 
         self.previewDataTable.treeview.grid(row=rowNumber, column=1,
                                             rowspan=self.previewDataTable.treeview.winfo_width(),
                                             columnspan=2, sticky=W)
         rowNumber += 1
-        separator2 = Label(root, text="")
-        separator2.grid(row=rowNumber, column=1)
+        Label(root, text="").grid(row=rowNumber, column=1)
         rowNumber += 1
 
         self.runButton.grid(row=rowNumber, column=1)
@@ -127,18 +123,23 @@ class Mainframe(Frame):
                 print("Reducing features...")
             if self.getInterpolateMissingValuesOption() == 'Yes':
                 print("Interpolating values...")
-            print("Training model...")
             self.create_model()
 
     def create_model(self):
+        print("Create model called")
         if self.model is None:
-            self.model = Model(self, None)
-        if self.model.model is None:
-            if self.getSelectedAlgorithm() == "Logistic Regression":
-                self.model.set_model(LogisticRegression(solver='lbfgs', max_iter=1000))
-            elif self.getSelectedAlgorithm() == "Decision Tree":
-                self.model.set_model(DecisionTreeClassifier())
-            elif self.getSelectedAlgorithm() == "Naive Bayes":
-                self.model.set_model(GaussianNB())
-        print("Created model")
+            self.model = Model(self, None, self.importExportDataManager.get_data())
+        if self.getSelectedAlgorithm() == "Logistic Regression":
+            self.model.set_model(LogisticRegression(solver='lbfgs', max_iter=1000))
+        elif self.getSelectedAlgorithm() == "Decision Tree":
+            self.model.model = DecisionTreeClassifier()
+            print(self.model.model.__class__)
+        elif self.getSelectedAlgorithm() == "Naive Bayes":
+            self.model.set_model(GaussianNB())
+        else:
+            messagebox.showinfo("Warning", "No algorithm selected")
+            return
+        optimizeParamsMsgBox = messagebox.askquestion("Optimize hyperparameters", "Would you like PyMine to optimize the parameters for this model?")
+        if optimizeParamsMsgBox == 'yes':
+            self.model.optimize_model_hyperparams(self.model.model)
         self.model.performance_summary()

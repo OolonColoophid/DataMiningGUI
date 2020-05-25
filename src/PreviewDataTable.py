@@ -31,7 +31,6 @@ class PreviewDataTable:
             # delete everything from treeview
             for child in self.treeview.get_children():
                 self.treeview.delete(child)
-
             # create columns
             self.treeview['columns'] = self.mainframe.importExportDataManager.get_column_names()
             for column in self.treeview['columns']:
